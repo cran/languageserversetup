@@ -7,6 +7,7 @@
 ![Deploy-CRAN](https://github.com/jozefhajnala/languageserversetup/workflows/deploy_debian_cran/badge.svg)
 ![Deploy-Dev](https://github.com/jozefhajnala/languageserversetup/workflows/deploy_debian_dev/badge.svg)
 ![Check-CRAN](https://github.com/jozefhajnala/languageserversetup/workflows/check_cran/badge.svg)
+![Check-Solaris](https://github.com/jozefhajnala/languageserversetup/workflows/check_solaris/badge.svg)
 [![License](https://img.shields.io/badge/license-AGPL%20(3.0)-success.svg?style=flat&labelColor=rgb(40,45,51))](http://www.gnu.org/licenses/agpl-3.0.html) 
 
 
@@ -20,7 +21,14 @@
 
 ## Installation
 
-You can install `languageserversetup` from GitHub using the remotes package. It has no dependencies, so no other packages are installed.
+
+You can install `languageserversetup` from CRAN. It has no dependencies, so no other packages are installed:
+
+```r
+install.packages("languageserversetup")
+```
+
+You can also install the latest development version from the master branch on GitHub using the remotes package:
 
 ```r
 remotes::install_github("jozefhajnala/languageserversetup")
@@ -59,7 +67,7 @@ All done, enjoy the awesomeness!
 
 ## Platform support
 
-Currently, the functionality is tested on 64bit versions of MS Windows 7, 10, Ubuntu 18.10 and MacOS El Capitan. Automated deployments and tests run via GitHub actions on macos-elcapitan-release, macos-elcapitan-release, and ubuntu-latest.
+Currently, the functionality is tested on 64bit versions of MS Windows 7, 10, Ubuntu 18.10 and MacOS El Capitan. Automated deployments and tests run via GitHub actions on macos-elcapitan-release, windows-x86_64-devel, ubuntu-gcc-release and fedora-clang-devel.
 
 All PR and issues related to platform support are most welcome! 
 
