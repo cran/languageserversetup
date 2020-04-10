@@ -20,7 +20,7 @@
 #' @param ... further arguments passed to `install.packages()` in case
 #'   `fromGitHub` is set to `FALSE`.
 #'
-#' @importFrom utils install.packages
+#' @importFrom utils install.packages installed.packages
 #'
 #' @return side-effects
 #' @seealso [utils::install.packages()]
@@ -48,14 +48,15 @@ languageserver_install <- function(
   continue <- if (isTRUE(confirmBeforeInstall)) {
     try(askYesNo( # nocov start
       paste(
-        "This will attempt to use remotes::install_github",
+        "This will attempt to use:",
+        "source('https://install-github.me/REditorSupport/languageserver')",
         "to install REditorSupport/languageserver into:",
         rlsLib,
         if (isTRUE(strictLibrary))
           "All dependencies will also be installed there"
         else
           "only installing unavailable dependencies",
-        if (isTRUE(fullReinstall))
+        if (isTRUE(fullReinstall) && dir.exists(rlsLib))
           paste("! The directory", rlsLib, "will be RECURSIVELY REMOVED !"),
         "Do you agree?",
         sep = "\n"
@@ -106,13 +107,14 @@ languageserver_install <- function(
 
   if (isTRUE(fromGitHub)) {
     if (isTRUE(dryRun)) {
-      lg("this is a dryRun, would run remotes::install_github")
-      return("remotes::install_github")
+      lg("this is a dryRun, would run source(...)")
+      return("source(...)")
     }
     lg("running dev installation")
     source( # nocov start
       "https://install-github.me/REditorSupport/languageserver"
-    ) # nocov end
+    )
+    # nocov end
   } else {
     if (isTRUE(dryRun)) {
       lg("this is a dryRun, would run utils::install.packages")
@@ -120,9 +122,34 @@ languageserver_install <- function(
     }
     lg("running install.packages")
     utils::install.packages( # nocov start
-      pkgs = "languageserver",
+      pkgs = c("languageserver"),
       lib = rlsLib,
       ...
     ) # nocov end
   }
+
+  if (isTRUE(dryRun)) { # nocov start
+    lg("This is a dryRun, would install languageserversetup")
+  } else {
+    lg("Making languageserversetup available in langugeserver library.")
+    pkgs <- utils::installed.packages(lib.loc = oldLibPaths)
+    cpRes <- file.copy(
+      file.path(
+        pkgs[rownames(pkgs) == "languageserversetup", "LibPath"],
+        "languageserversetup"
+      ),
+      rlsLib,
+      recursive = TRUE
+    )
+    if (!isTRUE(all(cpRes))) {
+      lg("Copying failed, attempting install from source.")
+      utils::install.packages(
+        pkgs = c("languageserversetup"),
+        lib = rlsLib,
+        type = "source"
+      )
+    }
+  } # nocov end
+
+  invisible()
 }

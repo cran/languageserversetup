@@ -4,9 +4,10 @@
 #'
 #' @param langServerProcessPatt `character(1)`, pattern to
 #'   recognize the process created by `languageserver`.
-#' @param processArgs `list()` of arguments to `system2` to
-#'   retrieve a list of processes. The command defaults to `wmic`
-#'   for windows and `ps` for other `sysnames`.
+#' @param os `character(1)`, name of the OS, usually retrieved
+#'   as the `"sysname"` element of `Sys.info`, all lowercase.
+#' @param pid `integer(1)`, id of the process to investigate,
+#'   usually retrieved by `Sys.getpid`
 #'
 #' @return side-effects
 #' @export
@@ -14,19 +15,27 @@ languageserver_startup <- function(
   rlsLib = getOption("langserver_library"),
   langServerProcessPatt = getOption("langserver_processPatt"),
   strictLibrary = TRUE,
-  processArgs = get_process_args()
+  os = tolower(Sys.info()[["sysname"]]),
+  pid = Sys.getpid()
 ) {
 
   lg("languageserver_startup Starting")
   on.exit(lg("languageserver_startup Exiting"))
 
+  if (identical(Sys.getenv("RSTUDIO"), "1")) {
+    lg("  This looks like RStudio, not doing anything.")
+    return(invisible(NA))
+  }
+
   oldLibPaths <- .libPaths()
   lg("  Current .libPaths: ", toString(oldLibPaths))
-  lg("  Running do.call system2 with: ", toString(processArgs))
-  cmd <- do.call(system2, processArgs)
-  lg("  Determined cmd: ", toString(cmd))
 
-  if (!any(grepl(langServerProcessPatt, cmd, fixed = TRUE))) {
+  isLangServer <- languageserver_detect(
+    pid = pid,
+    os = os,
+    langServerProcessPatt = langServerProcessPatt
+  )
+  if (!isLangServer) {
     lg("  Not language server process. No changes made.")
     return(invisible(NA))
   }
